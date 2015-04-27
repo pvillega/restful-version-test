@@ -1,4 +1,6 @@
-This is your new Play application
+Play RESTful versioning
 =================================
 
-This file will be packaged with your application, when using `activator dist`.
+My take on porting [this behaviour](http://boldradius.com/blog-post/VAXI9i4AADMA4lXn/using-http-header-to-version-a-restful-api-in-spray) into Play 2.3.x
+
+Just for fun, nothing special in here

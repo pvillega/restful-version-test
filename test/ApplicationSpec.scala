@@ -1,9 +1,13 @@
+import controllers.VHeaders
+import model.Model.User
+import org.junit.runner._
+import org.specs2.matcher.MatchResult
 import org.specs2.mutable._
 import org.specs2.runner._
-import org.junit.runner._
-
-import play.api.test._
+import play.api.libs.json.Json
 import play.api.test.Helpers._
+import play.api.test._
+import service.{ServiceV1, ServiceV2}
 
 /**
  * Add your spec here.
@@ -15,16 +19,33 @@ class ApplicationSpec extends Specification {
 
   "Application" should {
 
-    "send 404 on a bad request" in new WithApplication{
+    "send 404 on a bad request" in new WithApplication {
       route(FakeRequest(GET, "/boum")) must beNone
     }
 
-    "render the index page" in new WithApplication{
-      val home = route(FakeRequest(GET, "/")).get
+    "get version 1 response with Accept headers" in new WithApplication {
+      val user = new ServiceV1().getUser(1)
+      validateVersion(VHeaders.V1, user)
+    }
 
-      status(home) must equalTo(OK)
-      contentType(home) must beSome.which(_ == "text/html")
-      contentAsString(home) must contain ("Your new application is ready.")
+    "get version 2 response with Accept headers" in new WithApplication {
+      val user = new ServiceV2().getUser(2)
+      validateVersion(VHeaders.V2, user)
+    }
+
+    def validateVersion(version: String, user: User): MatchResult[String] = {
+      val request = FakeRequest(
+        method = "GET",
+        uri = "/user/1",
+        headers = FakeHeaders(
+          Seq("Accept" -> Seq(version))
+        ),
+        body = ""
+      )
+      val v1 = route(request).get
+
+      status(v1) must equalTo(OK)
+      contentAsString(v1) must be_==(Json.toJson(user).toString())
     }
   }
 }
